@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>શ્રી શક્તિ ગરબી મંડળ - નાટક પાત્રો મેનેજર (Online Sync)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Gujarati & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff5f2',
+                            100: '#ffe8e1',
+                            500: '#d94c1e',
+                            600: '#c23c12',
+                            700: '#a32d0b',
+                            800: '#84260d',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Hind Vadodara', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Hind Vadodara', 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Notebook Print Styling */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .print-notebook-page {
+                background-color: #ffffff;
+                background-image: linear-gradient(#e2e8f0 1px, transparent 1px);
+                background-size: 100% 2rem;
+                line-height: 2rem;
+                padding-left: 3rem !important;
+                border-left: 2px solid #ef4444 !important;
+                margin-left: 1rem;
+            }
+            .print-break-inside {
+                break-inside: avoid;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Top Multi-User Real-time Sync Banner -->
+    <div class="no-print bg-slate-900 text-slate-200 px-4 py-2 text-sm shadow-md flex flex-wrap justify-between items-center gap-2">
+        <div class="flex items-center gap-3">
+            <span id="syncStatusBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse mr-1.5"></span>
+                કનેક્ટ થઈ રહ્યું છે... (Connecting Online)
+            </span>
+            <span class="text-xs text-slate-400 hidden sm:inline">તમામ ઉપકરણો (Devices) પર ઓનલાઈન રિયલ-ટાઈમ સિંક ચાલુ છે</span>
+        </div>
+
+        <!-- Online Presence Badges -->
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400 mr-1">ઓનલાઈન સભ્યો:</span>
+            <div id="userPresenceBadges" class="flex gap-1.5"></div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <header class="no-print bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center overflow-hidden shadow-sm">
+                    <img src="ccc.jpg" alt="Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/100x100/d94c1e/ffffff?text=SSGM';">
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">શ્રી શક્તિ ગરબી મંડળ</h1>
+                    <p class="text-xs sm:text-sm font-medium text-brand-600">નાટક પાત્રો અને સ્ક્રિપ્ટ મેનેજર (Cloud Synced)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="relative inline-block text-left">
+                    <button id="userDropdownBtn" onclick="toggleUserDropdown()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 transition">
+                        <i class="fa-solid fa-user-circle text-brand-500 text-lg"></i>
+                        <span id="currentUserName">લોગિન કરો</span>
+                        <span id="currentUserRoleBadge" class="text-xs px-2 py-0.5 rounded font-semibold bg-brand-100 text-brand-700">-</span>
+                        <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
+                    </button>
+                    <div id="userDropdownMenu" class="hidden absolute right-0 mt-2 w-56 rounded-xl bg-white shadow-xl border border-slate-100 py-2 z-50">
+                        <div class="px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">યુઝર બદલો (Switch User)</div>
+                        <div id="userSwitchList" class="space-y-0.5"></div>
+                        <div class="border-t border-slate-100 my-1"></div>
+                        <button onclick="handleLogout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition">
+                            <i class="fa-solid fa-right-from-bracket"></i> લોગ આઉટ (Logout)
+                        </button>
+                    </div>
+                </div>
+
+                <button id="viewLogBtn" onclick="openLogModal()" class="hidden sm:flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition" title="એક્ટિવિટી લોગ જુઓ">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span class="hidden md:inline">લોગ (Logs)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Authentication Modal -->
+    <div id="loginScreen" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-100 relative overflow-hidden">
+            <div class="text-center mb-6">
+                <img src="ccc.jpg" alt="Logo" class="w-20 h-20 rounded-2xl mx-auto mb-3 shadow-md border-2 border-brand-100 object-cover" onerror="this.onerror=null; this.src='https://placehold.co/120x120/d94c1e/ffffff?text=SSGM';">
+                <h2 class="text-2xl font-bold text-slate-900">શ્રી શક્તિ ગરબી મંડળ</h2>
+                <p class="text-sm text-slate-500 mt-1">ઓનલાઈન સ્ક્રિપ્ટ મેનેજરમાં સાઇન-ઇન કરો</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">યુઝરનામ (Username)</label>
+                    <input type="text" id="loginUsername" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none transition" placeholder="ઉદા. nitin, paresh">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">પાસવર્ડ (Password)</label>
+                    <input type="password" id="loginPassword" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none transition" placeholder="••••••••">
+                </div>
+                
+                <div id="loginError" class="hidden p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-medium"></div>
+
+                <button type="submit" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 rounded-lg shadow-lg shadow-brand-500/30 transition flex items-center justify-center gap-2">
+                    <span>સાઇન ઇન કરો (Login)</span>
+                    <i class="fa-solid fa-arrow-right text-sm"></i>
+                </button>
+            </form>
+
+            <div class="mt-6 pt-6 border-t border-slate-100">
+                <p class="text-xs font-semibold text-slate-400 mb-2 text-center">ઝડપી લોગિન માટે પસંદ કરો:</p>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <button onclick="quickLogin('nitin', '123nitin')" class="p-2 text-left bg-slate-50 hover:bg-brand-50 border rounded text-slate-700 transition"><span class="font-bold text-brand-600">nitin</span> (Admin)</button>
+                    <button onclick="quickLogin('vishal', '123vishal')" class="p-2 text-left bg-slate-50 hover:bg-brand-50 border rounded text-slate-700 transition"><span class="font-bold text-brand-600">vishal</span> (Admin)</button>
+                    <button onclick="quickLogin('ashwin', '123ashwin')" class="p-2 text-left bg-slate-50 hover:bg-brand-50 border rounded text-slate-700 transition"><span class="font-bold text-brand-600">ashwin</span> (Admin)</button>
+                    <button onclick="quickLogin('paresh', '123paresh')" class="p-2 text-left bg-slate-50 hover:bg-slate-100 border rounded text-slate-700 transition"><span class="font-bold text-slate-800">paresh</span> (Edit-Only)</button>
+                    <button onclick="quickLogin('chirag', '123chirag')" class="p-2 text-left bg-slate-50 hover:bg-slate-100 border rounded text-slate-700 transition col-span-2"><span class="font-bold text-slate-800">chirag</span> (Edit-Only)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
+        <div class="no-print grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-user-plus text-brand-500"></i>
+                        <span>નવો પાત્ર ઉમેરો (Add Character)</span>
+                    </h2>
+                </div>
+                
+                <form id="addEntryForm" onsubmit="handleAddEntry(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">નાટકનું નામ</label>
+                        <input type="text" id="inputNatak" list="natakSuggestions" required class="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-sm transition" placeholder="દા.ત. સત્યવાદી રાજા હરિશ્ચંદ્ર">
+                        <datalist id="natakSuggestions"></datalist>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">પાત્રનું નામ</label>
+                        <input type="text" id="inputCharacter" required class="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-sm transition" placeholder="દા.ત. રોહિત / રાણી તારામતી">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">પ્રવેશ / દ્રશ્ય</label>
+                        <input type="text" id="inputPravesh" list="praveshSuggestions" required class="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-sm transition" placeholder="દા.ત. 1 અથવા પ્રવેશ ૧">
+                        <datalist id="praveshSuggestions"></datalist>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">રોલ / સંવાદ વિગત</label>
+                        <textarea id="inputRole" rows="3" required class="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-sm transition" placeholder="પાત્રનો રોલ અથવા વિગત..."></textarea>
+                    </div>
+
+                    <button type="submit" id="saveEntryBtn" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-medium py-2.5 rounded-lg shadow-md transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>ઓનલાઈન સાચવો (Save Online)</span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="lg:col-span-2 space-y-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto flex-grow">
+                        <div class="relative flex-grow">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                            <input type="text" id="searchInput" oninput="renderTable()" placeholder="શોધો..." class="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-sm">
+                        </div>
+                        <select id="filterNatak" onchange="renderTable()" class="px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-sm bg-white font-medium">
+                            <option value="">તમામ નાટક (All Plays)</option>
+                        </select>
+                    </div>
+
+                    <div id="adminActionButtons" class="flex items-center gap-2 w-full md:w-auto justify-end">
+                        <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-2"><i class="fa-solid fa-file-excel"></i><span>Excel</span></button>
+                        <button onclick="triggerPrint()" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-2"><i class="fa-solid fa-print"></i><span>Print PDF</span></button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-100 rounded-xl p-4 border border-slate-200 flex flex-wrap justify-between items-center text-xs font-semibold text-slate-600">
+                    <div class="flex items-center gap-4">
+                        <span>કુલ નાટક: <strong id="statTotalNatak" class="text-brand-600 text-sm">0</strong></span>
+                        <span>કુલ પ્રવેશ: <strong id="statTotalPravesh" class="text-slate-900 text-sm">0</strong></span>
+                        <span>કુલ પાત્રો: <strong id="statTotalCharacters" class="text-slate-900 text-sm">0</strong></span>
+                    </div>
+                </div>
+
+                <div id="tableContainer" class="space-y-6">
+                    <div class="bg-white rounded-2xl p-12 text-center border border-slate-200">
+                        <i class="fa-solid fa-spinner animate-spin text-3xl text-brand-500 mb-3"></i>
+                        <p class="text-slate-500 font-medium text-sm">ડેટા લોડ થઈ રહ્યો છે...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="printNotebookArea" class="hidden print:block print-notebook-page py-4">
+            <div class="text-center border-b-2 border-slate-800 pb-4 mb-6">
+                <h1 class="text-3xl font-bold">શ્રી શક્તિ ગરબી મંડળ</h1>
+                <h2 class="text-xl font-semibold text-slate-700 mt-1">નાટક પાત્રો અને દ્રશ્ય ની વિગત</h2>
+                <p class="text-xs text-slate-500 mt-1">પ્રિન્ટ તારીખ: <span id="printDate"></span></p>
+            </div>
+            <div id="printContent"></div>
+        </div>
+    </main>
+
+    <!-- Modals & Toasts -->
+    <div id="logModal" class="no-print fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col border border-slate-200">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2"><i class="fa-solid fa-list-check text-brand-500"></i><span>એક્ટિવિટી લોગ</span></h3>
+                <button onclick="closeLogModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-grow space-y-3" id="logModalContent"></div>
+            <div class="px-6 py-3 border-t border-slate-100 flex justify-between items-center bg-slate-50 rounded-b-2xl">
+                <button onclick="clearActivityLogs()" class="text-xs text-red-600 font-semibold"><i class="fa-solid fa-trash-can"></i> લોગ સાફ કરો</button>
+                <button onclick="closeLogModal()" class="px-4 py-1.5 bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg">બંધ કરો</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="praveshNoteModal" class="no-print fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200">
+            <h3 class="font-bold text-lg text-slate-900 mb-2">પ્રવેશ નોંધ ઉમેરો / બદલો</h3>
+            <textarea id="praveshNoteInput" rows="4" class="w-full px-3.5 py-2 rounded-lg border border-slate-300 outline-none text-sm mb-4" placeholder="નોંધ લખો..."></textarea>
+            <div class="flex justify-end gap-2">
+                <button onclick="closePraveshNoteModal()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg">રદ કરો</button>
+                <button onclick="savePraveshNote()" class="px-4 py-2 bg-brand-500 text-white text-xs font-semibold rounded-lg">સાચવો</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toastMessage">અપડેટ થયું!</span>
+    </div>
+
+    <footer class="no-print border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
+        <p>© શ્રી શક્તિ ગરબી મંડળ - નાટક પાત્રો મેનેજર</p>
+    </footer>
+
+    <!-- Firebase SDK Operations -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Exact User Firebase Config Integrated
+        const firebaseConfig = {
+            apiKey: "AIzaSyBljAJBNJikP8QIK8Vj0_FravkSPuyPmQQ",
+            authDomain: "shreeshaktigarbi.firebaseapp.com",
+            projectId: "shreeshaktigarbi",
+            storageBucket: "shreeshaktigarbi.firebasestorage.app",
+            messagingSenderId: "259010230579",
+            appId: "1:259010230579:web:144e19aeaa1f883bc66646",
+            measurementId: "G-J83PDHJX9B"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Collections
+        const entriesCol = collection(db, 'entries');
+        const notesCol = collection(db, 'pravesh_notes');
+        const logsCol = collection(db, 'activity_logs');
+        const presenceCol = collection(db, 'presences');
+
+        const USERS = [
+            { username: 'nitin', name: 'નિતિનભાઈ', role: 'Admin', pass: '123nitin', color: 'bg-emerald-500' },
+            { username: 'vishal', name: 'વિશાલભાઈ', role: 'Admin', pass: '123vishal', color: 'bg-blue-500' },
+            { username: 'ashwin', name: 'અશ્વિનભાઈ', role: 'Admin', pass: '123ashwin', color: 'bg-purple-500' },
+            { username: 'paresh', name: 'પરેશભાઈ', role: 'Edit-Only', pass: '123paresh', color: 'bg-amber-500' },
+            { username: 'chirag', name: 'ચિરાગભાઈ', role: 'Edit-Only', pass: '123chirag', color: 'bg-rose-500' }
+        ];
+
+        const GUJARATI_NUMS = ['૦', '૧', '૨', '૩', '૪', '૫', '૬', '૭', '૮', '૯'];
+
+        let currentUser = null;
+        let entriesData = [];
+        let praveshNotesData = {};
+        let activityLogs = [];
+        let activePresence = {};
+        let editingPraveshKey = null;
+
+        window.showToast = function(msg, isError = false) {
+            const toast = document.getElementById('toastNotification');
+            const icon = document.getElementById('toastIcon');
+            const message = document.getElementById('toastMessage');
+            if (!toast) return;
+            
+            message.textContent = msg;
+            icon.className = isError 
+                ? 'fa-solid fa-circle-exclamation text-red-400 text-base'
+                : 'fa-solid fa-circle-check text-emerald-400 text-base';
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        };
+
+        // --- AUTHENTICATION & INITIALIZATION ---
+        async function initAuth() {
+            try {
+                await signInAnonymously(auth);
+            } catch (err) {
+                console.warn("Anonymous Auth skipped or not enabled:", err.message);
+            }
+
+            updateSyncBadge(true, "ઓનલાઈન સિંક તૈયાર છે (Online)");
+            setupFirestoreListeners();
+            startPresenceHeartbeat();
+            checkSession();
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    updateSyncBadge(true, "ઓનલાઈન રિયલ-ટાઈમ ચાલુ છે (Online Active)");
+                }
+            });
+        }
+
+        function updateSyncBadge(online, text) {
+            const badge = document.getElementById('syncStatusBadge');
+            if (!badge) return;
+            badge.className = online 
+                ? "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                : "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30";
+            badge.innerHTML = `<span class="w-2 h-2 rounded-full ${online ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'} mr-1.5"></span>${text}`;
+        }
+
+        function setupFirestoreListeners() {
+            onSnapshot(entriesCol, (snapshot) => {
+                entriesData = [];
+                snapshot.forEach(docSnap => entriesData.push({ id: docSnap.id, ...docSnap.data() }));
+                renderTable();
+                renderDatalists();
+            });
+
+            onSnapshot(notesCol, (snapshot) => {
+                praveshNotesData = {};
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.key && data.text) praveshNotesData[data.key] = data.text;
+                });
+                renderTable();
+            });
+
+            onSnapshot(logsCol, (snapshot) => {
+                activityLogs = [];
+                snapshot.forEach(docSnap => activityLogs.push({ id: docSnap.id, ...docSnap.data() }));
+                activityLogs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                if (!document.getElementById('logModal').classList.contains('hidden')) renderLogModalContent();
+            });
+
+            onSnapshot(presenceCol, (snapshot) => {
+                activePresence = {};
+                const now = Date.now();
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.lastActive && (now - data.lastActive < 12000)) activePresence[docSnap.id] = data;
+                });
+                renderPresenceBadges();
+            });
+        }
+
+        function startPresenceHeartbeat() {
+            setInterval(async () => {
+                if (currentUser) {
+                    try {
+                        await setDoc(doc(db, 'presences', currentUser.username), {
+                            username: currentUser.username,
+                            name: currentUser.name,
+                            role: currentUser.role,
+                            color: currentUser.color,
+                            lastActive: Date.now()
+                        }, { merge: true });
+                    } catch (e) { console.error(e); }
+                }
+            }, 5000);
+        }
+
+        function renderPresenceBadges() {
+            const container = document.getElementById('userPresenceBadges');
+            if (!container) return;
+            container.innerHTML = USERS.map(u => {
+                const isOnline = activePresence[u.username] || (currentUser && currentUser.username === u.username);
+                return `
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${isOnline ? 'bg-slate-800 text-slate-200' : 'bg-slate-950/40 text-slate-500'}">
+                        <span class="w-1.5 h-1.5 rounded-full mr-1 ${isOnline ? u.color : 'bg-slate-600'}"></span>
+                        ${u.username}
+                    </span>
+                `;
+            }).join('');
+        }
+
+        function checkSession() {
+            const savedUser = sessionStorage.getItem('ssgm_logged_user');
+            if (savedUser) {
+                const found = USERS.find(u => u.username === savedUser);
+                if (found) { setCurrentUser(found, false); return; }
+            }
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        window.handleLogin = function(e) {
+            e.preventDefault();
+            const uInput = document.getElementById('loginUsername').value.trim().toLowerCase();
+            const pInput = document.getElementById('loginPassword').value.trim();
+            const errorDiv = document.getElementById('loginError');
+
+            const found = USERS.find(u => u.username.toLowerCase() === uInput && u.pass === pInput);
+            if (found) {
+                errorDiv.classList.add('hidden');
+                setCurrentUser(found, true);
+                logActivity(`${found.name} સાઇન-ઇન થયા.`);
+            } else {
+                errorDiv.textContent = 'ખોટો યુઝરનામ અથવા પાસવર્ડ!';
+                errorDiv.classList.remove('hidden');
+            }
+        };
+
+        window.quickLogin = function(username, password) {
+            document.getElementById('loginUsername').value = username;
+            document.getElementById('loginPassword').value = password;
+            window.handleLogin(new Event('submit'));
+        };
+
+        function setCurrentUser(userObj, saveSession = true) {
+            currentUser = userObj;
+            if (saveSession) sessionStorage.setItem('ssgm_logged_user', userObj.username);
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('currentUserName').textContent = userObj.name;
+            
+            const badge = document.getElementById('currentUserRoleBadge');
+            badge.textContent = userObj.role;
+            if (userObj.role === 'Admin') {
+                badge.className = 'text-xs px-2 py-0.5 rounded font-semibold bg-emerald-100 text-emerald-800';
+                document.getElementById('adminActionButtons').classList.remove('hidden');
+                document.getElementById('viewLogBtn').classList.remove('hidden');
+            } else {
+                badge.className = 'text-xs px-2 py-0.5 rounded font-semibold bg-amber-100 text-amber-800';
+                document.getElementById('adminActionButtons').classList.add('hidden');
+                document.getElementById('viewLogBtn').classList.add('hidden');
+            }
+            renderTable();
+            renderDatalists();
+        }
+
+        window.handleLogout = function() {
+            sessionStorage.removeItem('ssgm_logged_user');
+            currentUser = null;
+            document.getElementById('loginScreen').classList.remove('hidden');
+        };
+
+        window.toggleUserDropdown = function() {
+            document.getElementById('userDropdownMenu').classList.toggle('hidden');
+        };
+
+        function normalizePravesh(input) {
+            if (!input) return 'પ્રવેશ ૧';
+            let str = input.toString().trim();
+            let numStr = '';
+            for (let char of str) {
+                if (/\d/.test(char)) numStr += char;
+                else {
+                    const idx = GUJARATI_NUMS.indexOf(char);
+                    if (idx !== -1) numStr += idx;
+                }
+            }
+            let num = parseInt(numStr, 10);
+            if (isNaN(num) || num <= 0) num = 1;
+            const gujNumStr = num.toString().split('').map(d => GUJARATI_NUMS[parseInt(d, 10)]).join('');
+            return `પ્રવેશ ${gujNumStr}`;
+        }
+
+        function populatePraveshSuggestions() {
+            const datalist = document.getElementById('praveshSuggestions');
+            if (!datalist) return;
+            let options = '';
+            for (let i = 1; i <= 25; i++) {
+                const gujNum = i.toString().split('').map(d => GUJARATI_NUMS[parseInt(d, 10)]).join('');
+                options += `<option value="પ્રવેશ ${gujNum}">`;
+            }
+            datalist.innerHTML = options;
+        }
+
+        function renderDatalists() {
+            const natakList = document.getElementById('natakSuggestions');
+            const filterSelect = document.getElementById('filterNatak');
+            if (!natakList || !filterSelect) return;
+
+            const uniqueNataks = [...new Set(entriesData.map(e => e.natak))].filter(Boolean);
+            natakList.innerHTML = uniqueNataks.map(n => `<option value="${n}">`).join('');
+            const selectedFilter = filterSelect.value;
+            filterSelect.innerHTML = `<option value="">તમામ નાટક (All Plays)</option>` + uniqueNataks.map(n => `<option value="${n}" ${n === selectedFilter ? 'selected' : ''}>${n}</option>`).join('');
+        }
+
+        window.handleAddEntry = async function(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const btn = document.getElementById('saveEntryBtn');
+            btn.disabled = true;
+
+            const natak = document.getElementById('inputNatak').value.trim();
+            const character = document.getElementById('inputCharacter').value.trim();
+            const rawPravesh = document.getElementById('inputPravesh').value.trim();
+            const role = document.getElementById('inputRole').value.trim();
+
+            const normalizedPravesh = normalizePravesh(rawPravesh);
+
+            try {
+                await addDoc(entriesCol, {
+                    natak, character, pravesh: normalizedPravesh, role,
+                    updatedBy: currentUser.username, createdAt: Date.now()
+                });
+                logActivity(`${currentUser.name} એ નવો પાત્ર "${character}" ઉમેર્યો.`);
+                showToast(`"${character}" ઓનલાઈન ઉમેરાઈ ગયો!`);
+                document.getElementById('inputCharacter').value = '';
+                document.getElementById('inputRole').value = '';
+            } catch (err) {
+                showToast("ઉમેરવામાં ભૂલ થઈ", true);
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
+        window.handleInlineEdit = async function(id, field, newValue) {
+            const item = entriesData.find(e => e.id === id);
+            if (!item || !newValue.trim() || item[field] === newValue.trim()) return;
+
+            try {
+                await updateDoc(doc(db, 'entries', id), {
+                    [field]: newValue.trim(),
+                    updatedBy: currentUser.username,
+                    updatedAt: Date.now()
+                });
+                showToast("ફેરફાર સેવ થયો");
+            } catch (err) {
+                showToast("સાચવવામાં સમસ્યા આવી", true);
+            }
+        };
+
+        window.deleteEntry = async function(id) {
+            if (!currentUser || currentUser.role !== 'Admin') return;
+            if (confirm(`ડિલીટ કરવા માંગો છો?`)) {
+                try {
+                    await deleteDoc(doc(db, 'entries', id));
+                    showToast("ડિલીટ થઈ ગયું");
+                } catch (err) {
+                    showToast("ડિલીટમાં ભૂલ થઈ", true);
+                }
+            }
+        };
+
+        window.renderTable = function() {
+            const searchInput = document.getElementById('searchInput');
+            const filterNatakSelect = document.getElementById('filterNatak');
+            const container = document.getElementById('tableContainer');
+            if (!container) return;
+
+            const search = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            const filterNatak = filterNatakSelect ? filterNatakSelect.value : '';
+
+            const filtered = entriesData.filter(item => {
+                const matchesNatak = filterNatak ? item.natak === filterNatak : true;
+                const matchesSearch = !search || (item.natak && item.natak.toLowerCase().includes(search)) || (item.character && item.character.toLowerCase().includes(search)) || (item.role && item.role.toLowerCase().includes(search));
+                return matchesNatak && matchesSearch;
+            });
+
+            document.getElementById('statTotalNatak').textContent = new Set(filtered.map(f => f.natak)).size;
+            document.getElementById('statTotalPravesh').textContent = new Set(filtered.map(f => `${f.natak}|${f.pravesh}`)).size;
+            document.getElementById('statTotalCharacters').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="bg-white rounded-2xl p-12 text-center border border-slate-200"><p class="text-slate-500 font-medium text-sm">કોઈ પાત્રો કે દ્રશ્ય મળ્યા નથી.</p></div>`;
+                return;
+            }
+
+            const grouped = {};
+            filtered.forEach(item => {
+                if (!grouped[item.natak]) grouped[item.natak] = {};
+                if (!grouped[item.natak][item.pravesh]) grouped[item.natak][item.pravesh] = [];
+                grouped[item.natak][item.pravesh].push(item);
+            });
+
+            let html = '';
+            for (const natakName in grouped) {
+                html += `
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                            <h3 class="text-lg font-bold">${natakName}</h3>
+                        </div>
+                `;
+
+                for (const praveshName in grouped[natakName]) {
+                    const items = grouped[natakName][praveshName];
+                    const noteKey = `${natakName}|${praveshName}`;
+                    const noteText = praveshNotesData[noteKey] || '';
+
+                    html += `
+                        <div class="border-b border-slate-100 p-5">
+                            <div class="flex items-center justify-between mb-3 bg-brand-50/50 p-2.5 rounded-xl border border-brand-100">
+                                <h4 class="font-bold text-slate-800 text-base">${praveshName}</h4>
+                                ${currentUser && currentUser.role === 'Admin' ? `<button onclick="openPraveshNoteModal('${natakName}', '${praveshName}')" class="text-xs text-brand-600 font-medium">નોંધ ઉમેરો</button>` : ''}
+                            </div>
+                            ${noteText ? `<div class="mb-3 p-2 bg-amber-50 text-xs text-amber-900 rounded">${noteText}</div>` : ''}
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 text-xs">
+                                    <tr>
+                                        <th class="py-2 px-4 w-1/4">પાત્ર</th>
+                                        <th class="py-2 px-4">રોલ / સંવાદ</th>
+                                        <th class="py-2 px-4 text-center">યુઝર</th>
+                                        ${currentUser && currentUser.role === 'Admin' ? '<th class="py-2.5 px-4 text-center">ક્રિયા</th>' : ''}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    items.forEach(item => {
+                        html += `
+                            <tr class="hover:bg-slate-50">
+                                <td class="py-3 px-4 font-semibold" contenteditable="true" onblur="handleInlineEdit('${item.id}', 'character', this.innerText)">${item.character}</td>
+                                <td class="py-3 px-4" contenteditable="true" onblur="handleInlineEdit('${item.id}', 'role', this.innerText)">${item.role}</td>
+                                <td class="py-3 px-4 text-center text-xs text-slate-500">${item.updatedBy || ''}</td>
+                                ${currentUser && currentUser.role === 'Admin' ? `<td class="py-3 px-4 text-center"><button onclick="deleteEntry('${item.id}')" class="text-red-500"><i class="fa-solid fa-trash-can"></i></button></td>` : ''}
+                            </tr>
+                        `;
+                    });
+
+                    html += `</tbody></table></div>`;
+                }
+                html += `</div>`;
+            }
+            container.innerHTML = html;
+        };
+
+        // --- EXPORT TO EXCEL ---
+        window.exportToExcel = function() {
+            if (!currentUser || currentUser.role !== 'Admin') {
+                showToast('એક્સેલ એક્સપોર્ટ ફક્ત એડમિન કરી શકે છે.', true);
+                return;
+            }
+
+            if (entriesData.length === 0) {
+                showToast('ડાઉનલોડ કરવા માટે કોઈ ડેટા નથી.', true);
+                return;
+            }
+
+            let tableHTML = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+                <head><meta charset="UTF-8"></head>
+                <body>
+                <h2>શ્રી શક્તિ ગરબી મંડળ - નાટક પાત્રો ની વિગત</h2>
+                <table border="1" style="border-collapse:collapse;">
+                    <tr style="background-color:#d94c1e; color:#ffffff;">
+                        <th>નાટકનું નામ</th>
+                        <th>પ્રવેશ / દ્રશ્ય</th>
+                        <th>પાત્રનું નામ</th>
+                        <th>રોલ / સંવાદ વિગત</th>
+                        <th>અપડેટ કરનાર</th>
+                    </tr>
+            `;
+
+            entriesData.forEach(item => {
+                tableHTML += `
+                    <tr>
+                        <td>${item.natak || ''}</td>
+                        <td>${item.pravesh || ''}</td>
+                        <td>${item.character || ''}</td>
+                        <td>${item.role || ''}</td>
+                        <td>${item.updatedBy || ''}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `</table></body></html>`;
+
+            const blob = new Blob([tableHTML], { type: 'application/vnd.ms-excel;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Natak_Script_${new Date().toISOString().slice(0, 10)}.xls`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast("Excel ડાઉનલોડ થઈ ગયું!");
+        };
+
+        // --- PRINT TO PDF ---
+        window.triggerPrint = function() {
+            if (!currentUser || currentUser.role !== 'Admin') {
+                showToast('પ્રિન્ટ PDF ફક્ત એડમિન કરી શકે છે.', true);
+                return;
+            }
+
+            const printDateEl = document.getElementById('printDate');
+            if (printDateEl) printDateEl.textContent = new Date().toLocaleDateString('gu-IN');
+            
+            const printContent = document.getElementById('printContent');
+            if (!printContent) return;
+            
+            const grouped = {};
+            entriesData.forEach(item => {
+                if (!grouped[item.natak]) grouped[item.natak] = {};
+                if (!grouped[item.natak][item.pravesh]) grouped[item.natak][item.pravesh] = [];
+                grouped[item.natak][item.pravesh].push(item);
+            });
+
+            let html = '';
+            for (const natak in grouped) {
+                html += `<div class="mb-8 print-break-inside"><h2 class="text-2xl font-bold border-b-2 border-slate-900 pb-1 mb-4 text-brand-700">${natak}</h2>`;
+                for (const pravesh in grouped[natak]) {
+                    const noteKey = `${natak}|${pravesh}`;
+                    const noteText = praveshNotesData[noteKey];
+
+                    html += `
+                        <div class="mb-6 pl-2 border-l-2 border-slate-400">
+                            <h3 class="text-lg font-bold text-slate-800 mb-2">${pravesh}</h3>
+                            ${noteText ? `<p class="text-xs italic bg-slate-100 p-2 rounded mb-3">સૂચના: ${noteText}</p>` : ''}
+                            <table class="w-full text-left border-collapse mb-4">
+                                <thead>
+                                    <tr class="border-b border-slate-400 font-bold text-sm">
+                                        <th class="py-1 w-1/3">પાત્ર</th>
+                                        <th class="py-1">સંવાદ / રોલ વિગત</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    grouped[natak][pravesh].forEach(item => {
+                        html += `
+                            <tr class="border-b border-slate-200 text-sm">
+                                <td class="py-2 font-semibold align-top">${item.character || ''}</td>
+                                <td class="py-2 align-top">${item.role || ''}</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `</tbody></table></div>`;
+                }
+                html += `</div>`;
+            }
+
+            printContent.innerHTML = html;
+            window.print();
+        };
+
+        async function logActivity(actionText) {
+            try {
+                await addDoc(logsCol, { timestamp: new Date().toLocaleString('gu-IN'), user: currentUser ? currentUser.name : 'System', action: actionText, createdAt: Date.now() });
+            } catch (e) {}
+        }
+
+        window.openLogModal = function() {
+            renderLogModalContent();
+            document.getElementById('logModal').classList.remove('hidden');
+        };
+
+        function renderLogModalContent() {
+            const container = document.getElementById('logModalContent');
+            if (!container) return;
+            container.innerHTML = activityLogs.map(l => `<div class="p-2 border-b text-xs"><strong>${l.user}</strong>: ${l.action} <span class="text-gray-400 float-right">${l.timestamp}</span></div>`).join('');
+        }
+
+        window.closeLogModal = () => document.getElementById('logModal').classList.add('hidden');
+        
+        window.openPraveshNoteModal = (natak, pravesh) => {
+            editingPraveshKey = `${natak}|${pravesh}`;
+            const input = document.getElementById('praveshNoteInput');
+            if (input) input.value = praveshNotesData[editingPraveshKey] || '';
+            document.getElementById('praveshNoteModal').classList.remove('hidden');
+        };
+        
+        window.closePraveshNoteModal = () => document.getElementById('praveshNoteModal').classList.add('hidden');
+
+        window.savePraveshNote = async function() {
+            const input = document.getElementById('praveshNoteInput');
+            const text = input ? input.value.trim() : '';
+            const docId = editingPraveshKey.replace(/[^a-zA-Z0-9_\-]/g, '_');
+            await setDoc(doc(db, 'pravesh_notes', docId), { key: editingPraveshKey, text, updatedBy: currentUser ? currentUser.username : 'admin' });
+            closePraveshNoteModal();
+        };
+
+        window.onload = function() {
+            populatePraveshSuggestions();
+            initAuth();
+        };
+    </script>
+</body>
+</html>
